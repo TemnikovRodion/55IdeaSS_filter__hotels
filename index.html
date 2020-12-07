@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>55ideaSS</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <script src="https://kit.fontawesome.com/70cd6736bd.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+
+<body>
+    <!-- Блок с фильтрами -->
+    <aside>
+        <!-- Поиск по странам -->
+        <div class="filter_group">
+            <div class="title">
+                <div>Страна</div>
+                <i class="fas fa-angle-down"></i>
+            </div>
+
+            <div class="filter">
+                <input id="countries" class="input" type="text" placeholder="Введите страну, например, Греция">
+            </div>
+        </div>
+
+        <!-- Поиск по типам -->
+        <div class="filter_group">
+            <div class="title">
+                <div>Тип</div>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="filter">
+                <ul id="types">
+                    <li>
+                        <input id="hotel" type="checkbox" value="Отель" class="checkbox" hidden>
+                        <label for="hotel" class="checkbox_label">Отель</label>
+                    </li>
+                    <li>
+                        <input id="appartment" type="checkbox" value="Апартаменты" class="checkbox" hidden>
+                        <label for="appartment" class="checkbox_label">Апартаменты</label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Поиск по звездам -->
+        <div class="filter_group">
+            <div class="title">
+                <div>Количество звезд</div>
+                <i class="fas fa-angle-down"></i>
+            </div>
+
+            <div class="filter">
+                <ul id="starsList">
+                    <li>
+                        <input id="star1" type="checkbox" value="1" class="checkbox" hidden>
+                        <label for="star1" class="checkbox_label">1 звезда</label>
+                    </li>
+                    <li>
+                        <input id="star2" type="checkbox" value="2" class="checkbox" hidden>
+                        <label for="star2" class="checkbox_label">2 звезды</label>
+                    </li>
+                    <li>
+                        <input id="star3" type="checkbox" value="3" class="checkbox" hidden>
+                        <label for="star3" class="checkbox_label">3 звезды</label>
+                    </li>
+                    <li>
+                        <input id="star4" type="checkbox" value="4" class="checkbox" hidden>
+                        <label for="star4" class="checkbox_label">4 звезды</label>
+                    </li>
+                    <li>
+                        <input id="star5" type="checkbox" value="5" class="checkbox" hidden>
+                        <label for="star5" class="checkbox_label">5 звезд</label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Поиск по отзывам -->
+        <div class="filter_group">
+            <div class="title">
+                <div>Количество отзывов (от)</div>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="filter">
+                <input id="reviewsAmount" class="input" type="text" placeholder="Например, от 10">
+            </div>
+        </div>
+
+        <!-- Поиск по цене -->
+        <div class="filter_group">
+            <div class="title">
+                <div>Цена</div>
+                <i class="fas fa-angle-down"></i>
+            </div>
+            <div class="filter">
+                <div class="filter_open_price">
+                    <input id="input_lower" placeholder="от 0 ₽" readonly>
+                    <p>-</p>
+                    <input id="input_upper" placeholder="до 5000 ₽" readonly>
+                </div>
+                <div id="slider"></div>
+            </div>
+        </div>
+
+        <!-- Применение всех фильтров -->
+        <button id="filterButton" class="filter_accept">Применить фильтр</button>
+
+
+        <!-- Сброс всех фильтров -->
+        <button class="filter_remove btn-clear-filter">
+            <i class="fas fa-times"></i>
+            Очистить фильтр
+        </button>
+    </aside>
+
+    <!-- Контент сайта -->
+    <main>
+
+    </main>
+
+    <script type="text/javascript" src="/scripts/htmlBuilder.js"></script>
+    <script type="text/javascript" src="/scripts/filters.js"></script>
+    <script type="text/javascript" src="/scripts/slider.js"></script>
+    <script type="text/javascript" src="/scripts/autocomplete.js"></script>
+    <script>
+        // Загрузка списка отелей с файла json
+        let hotels = JSON.parse($.getJSON({ 'url': 'data/hotels.json', 'async': false }).responseText).hotels;
+
+        // Формирование карточек отелей на странице
+        createHotelsList(hotels);
+
+        // Инициализация слайдера цены
+        initializeSlider($("#slider"));
+
+        // Инициализация автозаполнения стран
+        countriesAutocomplete($("#countries"), Array.from(new Set(hotels.map(i => i.country))));
+
+        // Отображение/скрытие фильтра
+        $(".title").click(function () {
+            let filter = $(this).parent(".filter_group").children(".filter");
+
+            if (filter.hasClass("open")) {
+                filter.removeClass("open");
+                $(this).children("i").removeClass("rotated");
+            } else {
+                filter.addClass("open");
+                $(this).children("i").addClass("rotated");
+            }
+        });
+
+        // Фильтрация элементов
+        $("#filterButton").click(function () {
+            let data = filterData(hotels, $("#countries"), $("#starsList"), $("#types"), $("#reviewsAmount"), $("#slider"));
+
+            if (data.length != 0) createHotelsList(data);
+            else searchNoResult();
+        });
+
+        // Очистка всех фильтров
+        $("body").delegate(".btn-clear-filter", "click", function () {
+            clearFilters($("#countries"), $("#starsList"), $("#types"), $("#reviewsAmount"), $("#slider"));
+            createHotelsList(filterData(hotels, $("#countries"), $("#starsList"), $("#types"), $("#reviewsAmount"), $("#slider")));
+        });
+    </script>
+</body>
+
+</html>
