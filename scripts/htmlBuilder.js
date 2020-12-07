@@ -75,7 +75,7 @@ function getStartList(starsCount) {
 
 function searchNoResult() {
     $("main").html(`<div class="card_noresult">
-    <span class="card_noresult__image"><img src="/img/noResult.png"></span>
+    <span class="card_noresult__image"><img src="img/image.png"></span>
     <h3 class="card_noresult__search">По данным параметрам ничего не найдено</h3>
     <p class="card_noresult__text">Попробуйте изменить параметры фильтрации или вернуться в общий каталог</p>
     <button class="filter_remove btn-clear-filter">Очистить фильтр</button>
